@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxgSQwDwYoVfp5qwMo7LfJS7dwizq37LbIgIkbBRUVz-FSgxSPKBUF-Xqp3_2oZNvulhA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx5DZcMwgjSp8HrkvHL1lCFWOnHrwSiih_uWCZWIAvXMxU1l0wuq7OLQR7K6ag85QRkjQ/exec';
 
 // Standardized fetch wrapper
 async function fetchGasAPI(method, payload = null) {
@@ -75,6 +75,13 @@ export const api = {
     return await fetchGasAPI('POST', {
       action: 'deleteTransaction',
       tx_id: txId
+    });
+  },
+
+  deleteGoal: async (goalId) => {
+    return await fetchGasAPI('POST', {
+      action: 'deleteGoal',
+      goal_id: goalId
     });
   }
 };

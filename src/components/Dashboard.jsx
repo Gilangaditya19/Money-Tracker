@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { 
+import {
   User, Home, History,
-  Plus, Minus, Target, ArrowUpCircle, ArrowDownCircle, 
+  Plus, Minus, Target, ArrowUpCircle, ArrowDownCircle,
   LogOut, Wallet, TrendingUp, Trash2
 } from 'lucide-react';
 
@@ -65,6 +65,13 @@ function Dashboard({ user, onLogout }) {
     }
   };
 
+  const handleDeleteGoal = async (goalId) => {
+    if (window.confirm('Hapus target ini?')) {
+      await api.deleteGoal(goalId);
+      fetchDashboard();
+    }
+  };
+
   const openModal = (type) => {
     setTxType(type);
     setShowModal(true);
@@ -86,24 +93,24 @@ function Dashboard({ user, onLogout }) {
       <aside className="sidebar">
         <div className="sidebar-header" style={styles.sidebarHeader}>
           <div style={styles.avatar}>
-            <User size={24} color="var(--neon-green)" />
+            <User size={24} color="#FFFFFF" />
           </div>
-          <div>
-            <div style={{ fontWeight: '600', color: 'var(--neon-green)' }}>{user.username}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-primary)' }}>{user.username}</div>
           </div>
         </div>
 
         <nav className="nav" style={styles.nav}>
-          <div 
+          <div
             className="nav-item"
-            style={{ ...styles.navItem, ...(activeTab === 'home' ? styles.navItemActive : {}) }}
+            style={{ ...styles.navItem, ...(activeTab === 'home' ? styles.navItemActive : styles.navItemInactive) }}
             onClick={() => setActiveTab('home')}
           >
             <Home size={20} /> Beranda
           </div>
-          <div 
+          <div
             className="nav-item"
-            style={{ ...styles.navItem, ...(activeTab === 'activities' ? styles.navItemActive : {}) }}
+            style={{ ...styles.navItem, ...(activeTab === 'activities' ? styles.navItemActive : styles.navItemInactive) }}
             onClick={() => setActiveTab('activities')}
           >
             <History size={20} /> Aktivitas
@@ -111,8 +118,8 @@ function Dashboard({ user, onLogout }) {
         </nav>
 
         <div className="sidebar-footer" style={styles.sidebarFooter}>
-          <button className="btn" onClick={onLogout} style={{ width: '100%', background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', gap: '0.5rem' }}>
-            <LogOut size={18} /> Keluar
+          <button className="btn btn-secondary" onClick={onLogout} style={{ width: '100%', borderRadius: '24px' }}>
+            <LogOut size={18} /> <span className="hide-mobile">Keluar</span>
           </button>
         </div>
       </aside>
@@ -120,18 +127,18 @@ function Dashboard({ user, onLogout }) {
       {/* Main Content */}
       <main className="main-content">
         {/* Topbar */}
-        <header style={styles.topbar}>
-          <h2 style={{ color: 'var(--neon-green)', margin: 0, fontSize: '1.5rem', letterSpacing: '-1px' }}>MONEY TRACKER</h2>
+        <header className="panel panel-blue" style={styles.topbar}>
+          <h2 className="badge-pill bg-yellow" style={{ margin: 0, fontSize: '1.2rem' }}>MONEY TRACKER</h2>
         </header>
 
         {/* Dashboard Content Switching */}
         {activeTab === 'home' ? (
           <div className="dashboard-grid">
-            
+
             {/* Balance Card */}
-            <div className="panel" style={styles.balanceCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '500' }}>Total Saldo</h3>
+            <div className="panel panel-yellow">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <h3 className="badge-pill bg-white" style={{ fontSize: '1.2rem', margin: 0 }}>Total Saldo</h3>
               </div>
               <div className="balance-amount">
                 {loading ? '...' : formatMoney(data.balance)}
@@ -139,13 +146,13 @@ function Dashboard({ user, onLogout }) {
             </div>
 
             {/* Action Card */}
-            <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '500' }}>Catat Transaksi</h3>
-              <button className="btn btn-primary" onClick={() => openModal('income')} style={{ justifyContent: 'space-between' }}>
-                Tambah Pemasukan <Plus size={18} />
+            <div className="panel panel-pink" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <h3 className="badge-pill bg-white" style={{ fontSize: '1.2rem', margin: 0, alignSelf: 'flex-start' }}>Catat Transaksi</h3>
+              <button className="btn btn-primary" onClick={() => openModal('income')} style={{ justifyContent: 'space-between', borderRadius: '24px' }}>
+                Tambah Pemasukan <div className="circle-icon bg-white"><Plus size={16} /></div>
               </button>
-              <button className="btn btn-secondary" onClick={() => openModal('expense')} style={{ justifyContent: 'space-between' }}>
-                Catat Pengeluaran <Minus size={18} />
+              <button className="btn bg-white" onClick={() => openModal('expense')} style={{ justifyContent: 'space-between', borderRadius: '24px' }}>
+                Catat Pengeluaran <div className="circle-icon bg-yellow"><Minus size={16} /></div>
               </button>
             </div>
 
@@ -166,22 +173,34 @@ function Dashboard({ user, onLogout }) {
                 data.goals.map((goal, idx) => {
                   const progress = Math.min(Math.round((data.balance / goal.target_amount) * 100), 100);
                   return (
-                    <div key={idx} className="panel" style={{ marginBottom: '0.5rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div key={idx} className="panel panel-blue" style={{ marginBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <Target size={24} color={progress === 100 ? 'var(--neon-green)' : 'var(--neon-magenta)'} />
-                          <h3 style={{ fontSize: '1.5rem', fontWeight: '600' }}>{goal.goal_name}</h3>
+                          <div className="circle-icon bg-yellow"><Target size={20} color="#000" /></div>
+                          <h3 className="badge-pill bg-white" style={{ fontSize: '1.5rem', margin: 0 }}>{goal.goal_name}</h3>
                         </div>
-                        <span style={{ fontSize: '1.2rem', fontWeight: '600' }}>{progress}%</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className="badge-pill bg-pink" style={{ fontSize: '1rem' }}>{progress}%</span>
+                          <button 
+                            onClick={() => handleDeleteGoal(goal.goal_id)}
+                            className="circle-icon bg-white" 
+                            style={{ cursor: 'pointer', border: 'var(--border-thick)' }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-pink)'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                        <span>Saldo Saat Ini: {formatMoney(data.balance)}</span>
-                        <span>Target: {formatMoney(goal.target_amount)}</span>
-                      </div>
-
-                      <div style={styles.progressBarBg}>
-                        <div style={{ ...styles.progressBarFill, width: `${progress}%` }}></div>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem', padding: '0 0.5rem' }}>
+                          <span>{formatMoney(data.balance)} Tersimpan</span>
+                          <span>Target: {formatMoney(goal.target_amount)}</span>
+                        </div>
+                        <div style={styles.progressBarBg}>
+                          <div style={{ ...styles.progressBarFill, width: `${progress}%` }}></div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -190,13 +209,10 @@ function Dashboard({ user, onLogout }) {
             </div>
 
             {/* Activity Summary Card */}
-            <div className="panel activity-card-container">
+            <div className="panel panel-green activity-card-container">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '500' }}>Aktivitas Terkini</h3>
-                <span 
-                  style={{ fontSize: '0.85rem', color: 'var(--neon-green)', cursor: 'pointer' }}
-                  onClick={() => setActiveTab('activities')}
-                >
+                <h3 className="badge-pill bg-white" style={{ fontSize: '1.2rem', margin: 0 }}>Aktivitas</h3>
+                <span className="badge-pill bg-yellow" style={{ fontSize: '0.85rem', cursor: 'pointer' }} onClick={() => setActiveTab('activities')}>
                   Lihat Semua
                 </span>
               </div>
@@ -216,19 +232,19 @@ function Dashboard({ user, onLogout }) {
           </div>
         ) : (
           /* Full Activities Page */
-          <div className="panel animate-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div className="panel panel-green animate-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <h2 style={{ color: 'var(--neon-green)' }}>Riwayat Aktivitas</h2>
+              <h2 className="badge-pill bg-white" style={{ margin: 0 }}>Riwayat Aktivitas</h2>
             </div>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {data.transactions.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '4rem 0' }}>
-                   Tidak ada data aktivitas ditemukan.
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '4rem 0', fontWeight: '700' }}>
+                  Tidak ada data aktivitas ditemukan.
                 </div>
               ) : (
                 data.transactions.map((tx, idx) => (
-                  <div key={idx} style={{ ...styles.activityItem, padding: '1.25rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                  <div key={idx} className="panel bg-white" style={{ padding: '1rem', marginBottom: '0' }}>
                     <ActivityRow tx={tx} formatMoney={formatMoney} formatDate={formatDate} onDelete={handleDeleteTransaction} />
                   </div>
                 ))
@@ -286,24 +302,24 @@ function Dashboard({ user, onLogout }) {
             <form onSubmit={handleAddGoal}>
               <div className="input-group">
                 <label>Nama Target</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
+                <input
+                  type="text"
+                  className="input-field"
                   value={goalName}
                   onChange={(e) => setGoalName(e.target.value)}
                   placeholder="Contoh: Beli Laptop"
-                  required 
+                  required
                 />
               </div>
               <div className="input-group" style={{ marginBottom: '2rem' }}>
                 <label>Target Nominal (Rp)</label>
-                <input 
-                  type="number" 
-                  className="input-field" 
+                <input
+                  type="number"
+                  className="input-field"
                   value={goalTarget}
                   onChange={(e) => setGoalTarget(e.target.value)}
                   placeholder="0"
-                  required 
+                  required
                 />
               </div>
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -320,31 +336,28 @@ function Dashboard({ user, onLogout }) {
 
 // Sub-component for Transaction Row to avoid repetition
 function ActivityRow({ tx, formatMoney, formatDate, onDelete }) {
+  const isIncome = tx.type === 'income';
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={styles.activityIcon}>
-          {tx.type === 'income' ? <ArrowUpCircle size={20} color="var(--neon-green)" /> : <ArrowDownCircle size={20} color="var(--neon-magenta)" />}
+        <div className={`circle-icon ${isIncome ? 'bg-yellow' : 'bg-pink'}`}>
+          {isIncome ? <ArrowUpCircle size={20} color="#000" /> : <ArrowDownCircle size={20} color="#000" />}
         </div>
         <div>
-          <div style={{ fontWeight: '500' }}>{tx.title}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{formatDate(tx.date)}</div>
+          <div style={{ fontWeight: '800', color: 'var(--text-primary)' }}>{tx.title}</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600' }}>{formatDate(tx.date)}</div>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{
-          fontWeight: '600',
-          fontSize: '1.1rem',
-          color: tx.type === 'income' ? 'var(--neon-green)' : '#FFFFFF'
-        }}>
-          {tx.type === 'income' ? '+' : '-'} {formatMoney(tx.amount)}
+        <div className={`badge-pill ${isIncome ? 'bg-green' : 'bg-pink'}`} style={{ fontSize: '1.1rem' }}>
+          {isIncome ? '+' : '-'} {formatMoney(tx.amount)}
         </div>
-        <button 
+        <button
           onClick={() => onDelete(tx.tx_id)}
-          style={{ 
-            background: 'transparent', 
-            border: 'none', 
-            cursor: 'pointer', 
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
             color: 'var(--text-secondary)',
             opacity: 0.5,
             padding: '4px',
@@ -378,14 +391,15 @@ const styles = {
     marginBottom: '2rem',
   },
   avatar: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '8px',
-    backgroundColor: 'var(--border-subtle)',
+    width: '64px',
+    height: '64px',
+    borderRadius: '50%',
+    backgroundColor: '#000000',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '1.5rem'
+    fontSize: '1.5rem',
+    border: '2px solid #000',
   },
   nav: {
     flex: 1,
@@ -394,20 +408,25 @@ const styles = {
     gap: '0.5rem',
   },
   navItem: {
-    padding: '1rem',
-    borderRadius: '8px',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '40px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    color: 'var(--text-secondary)',
-    fontWeight: '500',
-    transition: 'all 0.2s',
+    color: 'var(--text-primary)',
+    fontWeight: '700',
+    border: '4px solid #000000',
+    transition: 'all 0.15s ease-out',
+    boxShadow: '4px 4px 0px #000000',
   },
   navItemActive: {
-    backgroundColor: 'rgba(178, 255, 0, 0.1)',
-    color: 'var(--text-primary)',
-    borderLeft: '4px solid var(--neon-green)',
+    backgroundColor: 'var(--bg-green)',
+    transform: 'translate(-2px, -2px)',
+    boxShadow: '6px 6px 0px #000000',
+  },
+  navItemInactive: {
+    backgroundColor: '#FFFFFF',
   },
   sidebarFooter: {
     marginTop: 'auto',
@@ -447,17 +466,17 @@ const styles = {
   },
   progressBarBg: {
     width: '100%',
-    height: '16px',
-    backgroundColor: 'var(--bg-base)',
-    border: '1px solid var(--border-subtle)',
-    borderRadius: '2px',
+    height: '24px',
+    backgroundColor: '#FFFFFF',
+    border: 'var(--border-thick)',
+    borderRadius: '40px',
     overflow: 'hidden',
+    boxShadow: 'var(--shadow-hard-sm)'
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: 'var(--neon-green)',
-    borderRight: '2px solid var(--neon-magenta)',
-    boxShadow: '0 0 10px var(--neon-green-glow)',
+    backgroundColor: 'var(--bg-yellow)',
+    borderRight: 'var(--border-thick)',
   },
   activityCard: {
     gridColumn: '2 / 3',

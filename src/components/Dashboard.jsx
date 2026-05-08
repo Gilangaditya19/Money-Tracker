@@ -106,14 +106,14 @@ function Dashboard({ user, onLogout }) {
             style={{ ...styles.navItem, ...(activeTab === 'home' ? styles.navItemActive : styles.navItemInactive) }}
             onClick={() => setActiveTab('home')}
           >
-            <Home size={20} /> Beranda
+            <Home size={20} /> <span>Beranda</span>
           </div>
           <div
             className="nav-item"
             style={{ ...styles.navItem, ...(activeTab === 'activities' ? styles.navItemActive : styles.navItemInactive) }}
             onClick={() => setActiveTab('activities')}
           >
-            <History size={20} /> Aktivitas
+            <History size={20} /> <span>Aktivitas</span>
           </div>
         </nav>
 
